@@ -16,7 +16,6 @@ namespace Controller
         public string comment;
         public string order;
         public string data_time;
-
         public override string ToString() {
             if (payment) {
                 strPayment = "cash";

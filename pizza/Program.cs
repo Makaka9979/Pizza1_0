@@ -3,9 +3,6 @@ using System.Collections;
 using System.Diagnostics;
 using Telegram.Bot;
 
-
-
-
 class Program
 {
     static ArrayList Menu()
@@ -54,30 +51,19 @@ class Program
     async static Task Main(string[] args) {
         string _token = "5529174269:AAFdFoselL-cnp7wt4EveCQ-cyMXxKNHJro";
         TelegramBotClient _client = new TelegramBotClient(_token);
-        string fileAddress = "E:\\Program Files\\Visual Studio 2022\\pizza\\pizza\\View\\mylog.log";
+        string fileAddress = "mylog.log";
 
         using LoggerPool lpool = new LoggerPool();
         lpool.AddLogger("cli", new CLILogger());
         lpool.AddLogger("file", new FileLogger(fileAddress));
-        
-        string temp = "Logger OK";
-        lpool.GetLogger("cli").Debug(temp);
-        lpool.GetLogger("cli").Info(temp);
-        lpool.GetLogger("cli").Warning(temp);
-        lpool.GetLogger("cli").Error(temp);
 
         ArrayList menu = Menu();
         Controller.Client user = new();
-        View.Telegram bot = new View.Telegram(_client, _token, lpool, menu, user);
+        Bot.Telegram bot = new Bot.Telegram(_client, _token, lpool, menu, user);
         
-        string start = $"\n\tSTART [{DateTime.Now}]\n";
+        string start = $"\tSTART [{DateTime.Now}]\n";
         lpool.GetLogger("cli").Info(start);
         lpool.GetLogger("file").Info(start);
         Console.ReadLine();
-    }
-
-    private string GetDebuggerDisplay()
-    {
-        return ToString();
     }
 }
