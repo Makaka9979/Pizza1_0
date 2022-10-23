@@ -3,13 +3,7 @@ using System.Collections;
 using System.Diagnostics;
 using Telegram.Bot;
 
-interface ILogger : IDisposable
-{
-    void Debug(string description);
-    void Info(string description);
-    void Warning(string description);
-    void Error(string description);
-}
+
 
 
 class Program
