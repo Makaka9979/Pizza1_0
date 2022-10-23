@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Diagnostics;
 using Telegram.Bot;
 
 interface ILogger : IDisposable
@@ -10,117 +11,6 @@ interface ILogger : IDisposable
     void Error(string description);
 }
 
-class CLILogger : ILogger
-{
-    public void Debug(string description)
-    {
-        Console.WriteLine("DEBUG::" + description);
-    }
-
-    public void Info(string description)
-    {
-        Console.WriteLine("INFO::" + description);
-    }
-
-    public void Warning(string description)
-    {
-        Console.WriteLine("WARNING::" + description);
-    }
-
-    public void Error(string description)
-    {
-        Console.WriteLine("ERROR::" + description);
-    }
-
-    public void Dispose() { }
-}
-
-class FileLogger : ILogger
-{
-    private bool _isDisposed = false;
-
-    private StreamWriter _writer;
-
-    public FileLogger() { Console.WriteLine("class FileLogger error"); }
-
-    public FileLogger(string path)
-    {
-        _writer = new StreamWriter(path, true);
-    }
-
-    public void Debug(string description)
-    {
-        _writer.WriteLineAsync("DEBUG::" + description);
-    }
-
-    public void Info(string description)
-    {
-        _writer.WriteLineAsync("INFO::" + description);
-    }
-
-    public void Warning(string description)
-    {
-        _writer.WriteLineAsync("WARNING::" + description);
-    }
-
-    public void Error(string description)
-    {
-        _writer.WriteLineAsync("ERROR::" + description);
-    }
-
-    public void Dispose()
-    {
-        if (!_isDisposed)
-        {
-            _writer.Dispose();
-            _isDisposed = true;
-        }
-    }
-}
-
-class LoggerPool : IDisposable
-{
-    private bool _isDisposed = false;
-
-    private Dictionary<string, ILogger> _loggerDictionary;
-
-    public LoggerPool()
-    {
-        _loggerDictionary = new Dictionary<string, ILogger>();
-    }
-
-    public void AddLogger(string loggerName, ILogger logger)
-    {
-        _loggerDictionary[loggerName] = logger;
-    }
-
-    public void RemoveLogger(string loggerName)
-    {
-        if (_loggerDictionary.ContainsKey(loggerName))
-        {
-            _loggerDictionary[loggerName].Dispose();
-            _loggerDictionary.Remove(loggerName);
-        }
-
-    }
-
-    public ILogger GetLogger(string loggerName)
-    {
-        return _loggerDictionary[loggerName];
-    }
-
-    public void Dispose()
-    {
-        if (!_isDisposed)
-        {
-            foreach (ILogger logger in _loggerDictionary.Values)
-            {
-                logger.Dispose();
-            }
-            _isDisposed = true;
-        }
-    }
-}
 
 class Program
 {
@@ -190,5 +80,10 @@ class Program
         lpool.GetLogger("cli").Info(start);
         lpool.GetLogger("file").Info(start);
         Console.ReadLine();
+    }
+
+    private string GetDebuggerDisplay()
+    {
+        return ToString();
     }
 }

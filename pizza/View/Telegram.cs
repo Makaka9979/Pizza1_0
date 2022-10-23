@@ -262,17 +262,17 @@ namespace View {
                         chatId: message.Chat.Id,
                         text: "Твiй кошик пустий.",
                         replyMarkup: basket);
-                    } else {
-                        string listOrders = "";
-                        for (int i = 0; i < (addOrder.Count - 1); i++)
-                        {
-                            listOrders += $"{((Controller.Order)addOrder[i]).ToString()}\n";
-                        }
-                        user.order = listOrders;
-                        sentMessage = await _client.SendTextMessageAsync(
-                                    chatId: message.Chat.Id,
-                                    text: listOrders,
-                                    replyMarkup: basket);
+                        /*} else {
+                            string listOrders = "";
+                            for (int i = 0; i < (addOrder.Count - 1); i++)
+                            {
+                                listOrders += $"{((Controller.Order)addOrder[i]).ToString()}\n";
+                            }
+                            user.order = listOrders;
+                            sentMessage = await _client.SendTextMessageAsync(
+                                        chatId: message.Chat.Id,
+                                        text: listOrders,
+                                        replyMarkup: basket); */
                     }
                 } else if (message.Text == "Головне меню") {
                     sentMessage = await _client.SendTextMessageAsync(
