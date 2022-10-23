@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Controller
+namespace Model
 {
-    internal struct Client {
+    internal struct User
+    {
         public string name;
         public long userId;
         public string deliveryAdress;
@@ -16,17 +17,21 @@ namespace Controller
         public string comment;
         public string order;
         public string data_time;
-        public override string ToString() {
-            if (payment) {
+        public override string ToString()
+        {
+            if (payment)
+            {
                 strPayment = "cash";
-            } else {
+            }
+            else
+            {
                 strPayment = "card";
             }
-            return ($"Iм'я: {name}\n" +
+            return $"Iм'я: {name}\n" +
                 $"Номер телефону: {phoneNumber}\n" +
                 $"Адреса доставки: {deliveryAdress}\n" +
                 $"Спосiб оплати: {strPayment}\n" +
-                $"Коментар: {comment}");
+                $"Коментар: {comment}";
         }
     }
 }
