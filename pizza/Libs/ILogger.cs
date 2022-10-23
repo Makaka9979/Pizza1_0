@@ -1,9 +1,12 @@
 ﻿using System;
 
-interface ILogger : IDisposable
+namespace Libs
 {
-    void Debug(string description);
-    void Info(string description);
-    void Warning(string description);
-    void Error(string description);
+    public interface ILogger : IDisposable
+    {
+        void Debug(string description);
+        void Info(string description);
+        void Warning(string description);
+        void Error(string description);
+    }
 }

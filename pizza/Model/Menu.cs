@@ -22,6 +22,5 @@ namespace Model {
             _text = text;
             _price = price;
         }
-        public Menu() { Console.WriteLine("class Menu error"); }
     }
 }

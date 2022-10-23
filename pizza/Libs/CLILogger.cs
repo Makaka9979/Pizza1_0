@@ -1,26 +1,29 @@
 ﻿using System;
 
-class CLILogger : ILogger
+namespace Libs
 {
-    public void Debug(string description)
+    class CLILogger : ILogger
     {
-        Console.WriteLine("DEBUG::" + description);
-    }
+        public void Debug(string description)
+        {
+            Console.WriteLine("DEBUG::" + description);
+        }
 
-    public void Info(string description)
-    {
-        Console.WriteLine("INFO::" + description);
-    }
+        public void Info(string description)
+        {
+            Console.WriteLine("INFO::" + description);
+        }
 
-    public void Warning(string description)
-    {
-        Console.WriteLine("WARNING::" + description);
-    }
+        public void Warning(string description)
+        {
+            Console.WriteLine("WARNING::" + description);
+        }
 
-    public void Error(string description)
-    {
-        Console.WriteLine("ERROR::" + description);
-    }
+        public void Error(string description)
+        {
+            Console.WriteLine("ERROR::" + description);
+        }
 
-    public void Dispose() { }
+        public void Dispose() { }
+    }
 }

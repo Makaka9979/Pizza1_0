@@ -86,10 +86,12 @@ namespace Controller
         public async void Run(ITelegramBotClient _client, Update update)
         {
             var message = update.Message.Text;
-            if(message == "/start")
+            if (message == "/start")
                 HandleStart(_client, update);
             else if (message == "Головне меню")
                 HandleIndex(_client, update);
+            else if (message == "Контакти")
+                HandleContact(_client, update);
         }
     }
 }

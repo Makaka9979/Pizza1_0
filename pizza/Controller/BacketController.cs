@@ -1,7 +1,6 @@
 ﻿using Libs;
 using System;
 using System.Collections;
-using System.ComponentModel;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -12,10 +11,7 @@ namespace Controller
     class BacketController : IController
     {
         private ArrayList _menu = AddMenu();
-        private int _page = 0;
-        Model.User user = new();
 
-        private ArrayList addOrder = new ArrayList();
         private ReplyKeyboardMarkup other = new(new[] {
             new KeyboardButton[] { "Головне меню" }
         }) { ResizeKeyboard = false };
@@ -81,7 +77,7 @@ namespace Controller
             }
             return menu;
         }
-        private async Task Menu(ITelegramBotClient _client, Message message)
+        private async Task Menu(ITelegramBotClient _client, Message message, int _page)
         {
             if (_page < 0) { _page = 0; }
             if (_page >= _menu.Count) { _page = _menu.Count - 1; }
@@ -97,35 +93,40 @@ namespace Controller
                         caption: text,
                         parseMode: ParseMode.Html,
                         replyMarkup: menu);
-            //logger.GetLogger("file").Info($"[{DateTime.Now}] #{message.Chat.Id}_[{message.MessageId}] '{message.Text}'");
         }
         public async void HandleAdd(ITelegramBotClient _client, Update update)
         {
-            addOrder.Add((Model.Menu)_menu[_page]);
+            int _page = (int)SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"];
+            
+            ((ArrayList)SessionRegistry.Sessions[update.Message.Chat.Id].State["orders"]).Add((Model.Menu)_menu[_page]);
              await _client.SendTextMessageAsync(
                 chatId: update.Message.Chat.Id,
                 text: $"Так, я добавив пiцу '{((Model.Menu)_menu[_page]).Name}' до кошику");
-            _page++;
-            await Menu(_client, update.Message);
+            SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"] = (object)_page;
+            await Menu(_client, update.Message, _page);
         }
         public async void HandleMenuNext(ITelegramBotClient _client, Update update)
         {
+            int _page = (int)SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"];
             _page++;
-            await Menu(_client, update.Message);
+            SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"] = (object)_page;
+            await Menu(_client, update.Message, _page);
         }
         public async void HandleMenuPrev(ITelegramBotClient _client, Update update)
         {
+            int _page = (int)SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"];
             _page--;
-            await Menu(_client, update.Message);
+            SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"] = (object)_page;
+            await Menu(_client, update.Message, _page);
         }
         public async void HandleMenu(ITelegramBotClient _client, Update update)
         {
-            _page = 0;
-            await Menu(_client, update.Message);
+            SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"] = (object)0;
+            await Menu(_client, update.Message, 0);
         }
         public async void HandleClear(ITelegramBotClient _client, Update update)
         {
-            addOrder.Clear();
+            ((ArrayList)SessionRegistry.Sessions[update.Message.Chat.Id].State["orders"]).Clear();
             await _client.SendTextMessageAsync(
                 chatId: update.Message.Chat.Id,
                 text: "Тепер твiй кошик пустий.",
@@ -133,21 +134,21 @@ namespace Controller
         }
         public async void HandleShowBacketContent(ITelegramBotClient _client, Update update)
         {
-            if (addOrder.Count < 1)
+            if (((ArrayList)SessionRegistry.Sessions[update.Message.Chat.Id].State["orders"]).Count < 1)
             {
                 await _client.SendTextMessageAsync(
                 chatId: update.Message.Chat.Id,
                 text: "Твiй кошик пустий.",
                 replyMarkup: index);
-                await Menu(_client, update.Message);
+                await Menu(_client, update.Message, (int)SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"]);
                 return;
             }
             string listOrders = "";
-            for (int i = 0; i < addOrder.Count; i++)
+            for (int i = 0; i < ((ArrayList)SessionRegistry.Sessions[update.Message.Chat.Id].State["orders"]).Count; i++)
             {
-                listOrders += $"{(addOrder[i]).ToString()}\n";
+                listOrders += $"{((ArrayList)SessionRegistry.Sessions[update.Message.Chat.Id].State["orders"])[i].ToString()}\n";
             }
-            user.order = listOrders;
+            // user.order = listOrders;
             await _client.SendTextMessageAsync(
                         chatId: update.Message.Chat.Id,
                         text: listOrders,
@@ -169,6 +170,6 @@ namespace Controller
             else if (message == "Корзина")
                 HandleShowBacketContent(_client, update);
         }
-
     }
 }
+//LoggerRegistry.GetLogger("file").Info($"[{DateTime.Now}] #{message.Chat.Id}_[{message.MessageId}] '{message.Text}'");

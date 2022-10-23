@@ -7,34 +7,24 @@ using Telegram.Bot.Types.ReplyMarkups;
 using System.Collections;
 using Telegram.Bot.Types.Enums;
 using Libs;
-using Model;
 
 namespace Bot
 {
     internal class Telegram
     {
-        private string _token = "";
-        private int _condition = 0;
         private TelegramBotClient _client;
-        private static LoggerPool logger;
-        private ArrayList _menu;
-        private ArrayList addOrder = new ArrayList();
-        Model.User user;
-        private byte countBasket = 0;
 
-        private static long admin_id = 562489554;
-
-       
-        public Telegram() { Console.WriteLine("class Telegram error"); }
-        public Telegram(TelegramBotClient _client, string _token, LoggerPool loggerPool, ArrayList _menu, Model.User user)
+        //private static long admin_id = 562489554;
+        public Telegram()
         {
-            this._client = _client;
-            this._token = _token;
-            this._client.StartReceiving(Update, ErrorMessage);
-            logger = loggerPool;
-            this._menu = _menu;
-            this.user = user;
+            string _token = "5529174269:AAFdFoselL-cnp7wt4EveCQ-cyMXxKNHJro";
+            _client = new TelegramBotClient(_token); ;
         }
+        public void Run() 
+        {
+            _client.StartReceiving(Update, ErrorMessage);
+        }
+
         /*private async Task PlaceAnOrder(Message message)
         {
             Message sentMessage;
@@ -159,23 +149,26 @@ namespace Bot
                 return;
             if (message.Text == null)
                 return;
-                Thread.Sleep(250);
-                ControllerRegistry.Get(message.Text)?.Run(_client, update);
+            if (!SessionRegistry.Sessions.ContainsKey(message.Chat.Id))
+            {
+                Session session = new();
+                ArrayList orders = new ArrayList();
+                session.State.Add("orders", (object)orders);
+                session.State.Add("id", (object)message.Chat.Id);
+                session.State.Add("currentPage", (object)0);
+                SessionRegistry.Sessions.Add(message.Chat.Id, session);
+                
+            }
+            Thread.Sleep(250);
+            ControllerRegistry.Get(message.Text)?.Run(_client, update);
         }
 
         private static Task ErrorMessage(ITelegramBotClient client, Exception exception, CancellationToken token)
         {
-            string msg = "";
-            try
-            {
-                msg = $"[{DateTime.Now}] {exception.Message}";
-            }
-            catch (NotImplementedException e)
-            {
-                msg = $"[{DateTime.Now}] {e.Message}";
-            }
-            logger.GetLogger("cli").Warning(msg);
-            logger.GetLogger("file").Warning(msg);
+            string msg = $"[{DateTime.Now}] {exception.Message}";
+
+            LoggerRegistry.GetLogger("cli").Warning(msg);
+            LoggerRegistry.GetLogger("file").Warning(msg);
 
             return Task.CompletedTask;
         }
