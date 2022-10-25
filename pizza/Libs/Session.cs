@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Libs
+﻿namespace Libs
 {
     public class Session
     {

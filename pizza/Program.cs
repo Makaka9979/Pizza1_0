@@ -1,28 +1,17 @@
-﻿using System;
-using System.Collections;
-using System.Diagnostics;
-using Telegram.Bot;
-using Controller;
-using Libs;
-using Model;
+﻿using Libs;
 
 class Program
 {
-    async static Task Main(string[] args) {
+    async static Task Main(string[] args) 
+    {
+        string fileAddress = "infoLog.log";
 
-        ApplicationConfiguration app = new ApplicationConfiguration();
-        app.Metod();
-        return;
-
-
-        string fileAddress = "mylog.log";
-
-        var menuController = new MenuController();
+        var menuController = new Controller.MenuController();
         ControllerRegistry.Add("/start", menuController);
         ControllerRegistry.Add("Головне меню", menuController);
         ControllerRegistry.Add("Контакти", menuController);
 
-        var backetController = new BacketController();
+        var backetController = new Controller.BacketController();
         ControllerRegistry.Add("Меню", backetController);
         ControllerRegistry.Add("⏪ Назад", backetController);
         ControllerRegistry.Add("⏩ Вперед", backetController);
@@ -30,18 +19,20 @@ class Program
         ControllerRegistry.Add("Корзина", backetController);
         ControllerRegistry.Add("Очистити", backetController);
 
-
         LoggerRegistry.AddLogger("cli", new CLILogger());
         LoggerRegistry.AddLogger("file", new FileLogger(fileAddress));
 
         Bot.Telegram bot = new Bot.Telegram();
         
-        string start = $"\tSTART [{DateTime.Now}]\n";
-        LoggerRegistry.GetLogger("cli").Info(start);
-        LoggerRegistry.GetLogger("file").Info(start);
+        string now = $" START [{DateTime.Now}]\n";
+        LoggerRegistry.GetLogger("cli").Info(now);
+        LoggerRegistry.GetLogger("file").Info(now);
 
         bot.Run();
         Console.ReadLine();
+
+        now = $" STOP [{DateTime.Now}]\n";
+        LoggerRegistry.GetLogger("file").Info(now);
     }
 }
 /*else if (message.Text == "Замовити")

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Model
+﻿namespace Model
 {
     internal struct User
     {
@@ -17,6 +11,7 @@ namespace Model
         public string comment;
         public string order;
         public string data_time;
+        public bool readyToOrder;
         public override string ToString()
         {
             if (payment)
@@ -32,6 +27,17 @@ namespace Model
                 $"Адреса доставки: {deliveryAdress}\n" +
                 $"Спосiб оплати: {strPayment}\n" +
                 $"Коментар: {comment}";
+        }
+        public void Clear()
+        {
+            name = "";
+            deliveryAdress = "";
+            phoneNumber = "";
+            strPayment = "";
+            comment = "";
+            order = "";
+            data_time = "";
+            readyToOrder = false;
         }
     }
 }

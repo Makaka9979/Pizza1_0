@@ -1,11 +1,6 @@
-﻿using System;
-using System.IO;
-using System.Text;
-using Telegram.Bot;
+﻿using Telegram.Bot;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.ReplyMarkups;
 using System.Collections;
-using Telegram.Bot.Types.Enums;
 using Libs;
 
 namespace Bot
@@ -13,6 +8,7 @@ namespace Bot
     internal class Telegram
     {
         private TelegramBotClient _client;
+        private Model.User user = new();
 
         //private static long admin_id = 562489554;
         public Telegram()
@@ -156,10 +152,15 @@ namespace Bot
                 session.State.Add("orders", (object)orders);
                 session.State.Add("id", (object)message.Chat.Id);
                 session.State.Add("currentPage", (object)0);
+
+                user.readyToOrder = false;
+                user.userId = message.Chat.Id;
+                session.State.Add("userInformation", (object)user);
+
                 SessionRegistry.Sessions.Add(message.Chat.Id, session);
-                
             }
-            Thread.Sleep(250);
+            Thread.Sleep(100);
+            LoggerRegistry.GetLogger("file").Info($"[{DateTime.Now}] #{message.Chat.Id}_[{message.MessageId}] '{message.Text}'");
             ControllerRegistry.Get(message.Text)?.Run(_client, update);
         }
 

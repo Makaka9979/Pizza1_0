@@ -1,22 +1,10 @@
-﻿using Libs;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Libs;
-using Telegram.Bot.Types;
+﻿using Telegram.Bot.Types;
 using Telegram.Bot;
-using System.Reflection;
 using Telegram.Bot.Types.ReplyMarkups;
-using Model;
-using Telegram.Bot.Types.Enums;
-using System.Collections;
-using Microsoft.VisualBasic;
 
 namespace Controller
 {
-    internal class MenuController : IController
+    internal class MenuController : Libs.IController
     {
         private string contactFName = "Пiцца Харкiв";
         private static string contactPhone = "+111111111111";
@@ -36,7 +24,8 @@ namespace Controller
             new KeyboardButton[] { "Головне меню" }
         }) { ResizeKeyboard = true };
 
-        private string LogSaveUser(Message message)
+        //message start from user
+        private string NewUserMsg(Message message)
         {
             string userData = "...\nNEW_USER:: ";
             if (message.Chat.LastName != null) { userData += $"LastName:'{message.Chat.LastName}'/, "; }
@@ -48,7 +37,7 @@ namespace Controller
             if (message.Chat.InviteLink != null) { userData += $"InviteLink:'{message.Chat.InviteLink}'/ "; }
             if (message.Chat.StickerSetName != null) { userData += $"StickerSetName:'{message.Chat.StickerSetName}'/ "; }
             if (message.Chat.Description != null) { userData += $"Description:'{message.Chat.Description}'/ "; }
-            return userData + $"Id:'{message.Chat.Id}'\n";
+            return (userData + $"Id:'{message.Chat.Id}'\n");
         }
         
         public async void HandleContact(ITelegramBotClient _client, Update update)
@@ -85,7 +74,7 @@ namespace Controller
         }
         public async void Run(ITelegramBotClient _client, Update update)
         {
-            var message = update.Message.Text;
+            string message = update.Message.Text;
             if (message == "/start")
                 HandleStart(_client, update);
             else if (message == "Головне меню")

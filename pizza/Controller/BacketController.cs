@@ -1,6 +1,4 @@
-﻿using Libs;
-using System;
-using System.Collections;
+﻿using System.Collections;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -8,21 +6,24 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Controller 
 {
-    class BacketController : IController
+    class BacketController : Libs.IController
     {
-        private ArrayList _menu = AddMenu();
+        private const ushort deliveryPrise = 59; //Незмінна ціна доставки піци.
 
-        private ReplyKeyboardMarkup other = new(new[] {
-            new KeyboardButton[] { "Головне меню" }
-        }) { ResizeKeyboard = false };
-        private ReplyKeyboardMarkup index = new(new[] {
-            new KeyboardButton[] { "Головне меню" }
-        }) { ResizeKeyboard = true };
+        private long allPriseOrder = 0;
+        private Model.User user;
+        private ArrayList _menu = AddMenu();
         private ReplyKeyboardMarkup ifAllGood = new(new[] {
             new KeyboardButton[] { "Yes", "No" }
-        }) { ResizeKeyboard = true };
+        }) { ResizeKeyboard = true }; //........
         private ReplyKeyboardMarkup paymend = new(new[] {
             new KeyboardButton[] { "Картою", "Готiвкою" }
+        }) { ResizeKeyboard = true }; //........
+        private ReplyKeyboardMarkup other = new(new[] {
+            new KeyboardButton[] { "Головне меню" }
+        }) { ResizeKeyboard = false }; //........
+        private ReplyKeyboardMarkup index = new(new[] {
+            new KeyboardButton[] { "Головне меню" }
         }) { ResizeKeyboard = true };
         private ReplyKeyboardMarkup basket = new(new[] {
             new KeyboardButton[] { "Замовити", "Очистити" },
@@ -87,7 +88,7 @@ namespace Controller
                         $"<i>Цiна:</i> <a>{((Model.Menu)_menu[_page]).Price}</a>\n\n" +
                         $"<a>Сторiнка меню </a>[<b><i>{currentState}</i></b>]";
 
-            Message sentMessage = await _client.SendPhotoAsync(
+            await _client.SendPhotoAsync(
                         chatId: message.Chat.Id,
                         photo: ((Model.Menu)_menu[_page]).Link,
                         caption: text,
@@ -96,37 +97,44 @@ namespace Controller
         }
         public async void HandleAdd(ITelegramBotClient _client, Update update)
         {
-            int _page = (int)SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"];
+            int _page = (int)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"];
             
-            ((ArrayList)SessionRegistry.Sessions[update.Message.Chat.Id].State["orders"]).Add((Model.Menu)_menu[_page]);
+            ((ArrayList)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["orders"]).Add((Model.Menu)_menu[_page]);
              await _client.SendTextMessageAsync(
                 chatId: update.Message.Chat.Id,
                 text: $"Так, я добавив пiцу '{((Model.Menu)_menu[_page]).Name}' до кошику");
-            SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"] = (object)_page;
+            allPriseOrder += ((Model.Menu)_menu[_page]).Price;
+            Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"] = (object)_page;
             await Menu(_client, update.Message, _page);
         }
         public async void HandleMenuNext(ITelegramBotClient _client, Update update)
         {
-            int _page = (int)SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"];
+            int _page = (int)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"];
             _page++;
-            SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"] = (object)_page;
+            Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"] = (object)_page;
             await Menu(_client, update.Message, _page);
         }
         public async void HandleMenuPrev(ITelegramBotClient _client, Update update)
         {
-            int _page = (int)SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"];
+            int _page = (int)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"];
             _page--;
-            SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"] = (object)_page;
+            Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"] = (object)_page;
             await Menu(_client, update.Message, _page);
         }
         public async void HandleMenu(ITelegramBotClient _client, Update update)
         {
-            SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"] = (object)0;
+            Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"] = (object)0;
             await Menu(_client, update.Message, 0);
+        }
+        public async void HandleDeliveryData(ITelegramBotClient _client, Update update)
+        {
+            user = (Model.User)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"];
+            
         }
         public async void HandleClear(ITelegramBotClient _client, Update update)
         {
-            ((ArrayList)SessionRegistry.Sessions[update.Message.Chat.Id].State["orders"]).Clear();
+            ((ArrayList)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["orders"]).Clear();
+            allPriseOrder = 0;
             await _client.SendTextMessageAsync(
                 chatId: update.Message.Chat.Id,
                 text: "Тепер твiй кошик пустий.",
@@ -134,26 +142,29 @@ namespace Controller
         }
         public async void HandleShowBacketContent(ITelegramBotClient _client, Update update)
         {
-            if (((ArrayList)SessionRegistry.Sessions[update.Message.Chat.Id].State["orders"]).Count < 1)
+            if (((ArrayList)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["orders"]).Count < 1)
             {
                 await _client.SendTextMessageAsync(
                 chatId: update.Message.Chat.Id,
                 text: "Твiй кошик пустий.",
                 replyMarkup: index);
-                await Menu(_client, update.Message, (int)SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"]);
+                await Menu(_client, update.Message, (int)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"]);
                 return;
             }
-            string listOrders = "";
-            for (int i = 0; i < ((ArrayList)SessionRegistry.Sessions[update.Message.Chat.Id].State["orders"]).Count; i++)
+            string listOrders = "Твоє замовлення:\n";
+            for (int i = 0; i < ((ArrayList)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["orders"]).Count; i++)
             {
-                listOrders += $"{((ArrayList)SessionRegistry.Sessions[update.Message.Chat.Id].State["orders"])[i].ToString()}\n";
+                listOrders += $" • {((ArrayList)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["orders"])[i].ToString()}\n";
             }
+            allPriseOrder += deliveryPrise;
+            listOrders += $"Доставка - {deliveryPrise} гривень\nВсього: {allPriseOrder} гривень, 0 копійок";
             // user.order = listOrders;
             await _client.SendTextMessageAsync(
                         chatId: update.Message.Chat.Id,
                         text: listOrders,
                         replyMarkup: basket);
         }
+
         public async void Run(ITelegramBotClient _client, Update update)
         {
             var message = update.Message.Text;
