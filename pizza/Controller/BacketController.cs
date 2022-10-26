@@ -117,7 +117,7 @@ namespace Controller
                 {
                     await _client.SendTextMessageAsync(
                         chatId: update.Message.Chat.Id,
-                        text: ($"{((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).order}\n\n{((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).ToString()}"),
+                        text: ($"{((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).order}\n----------\n{((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).ToString()}"),
                         replyMarkup: Keyboard.ifComment1);
                 }
             }

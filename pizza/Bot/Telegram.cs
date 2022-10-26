@@ -154,10 +154,12 @@ namespace Bot
                         if (message == "Yes")
                         {
                             user.readyToOrder = true;
+                            user.ifHaveCommand = false;
                             await _client.SendTextMessageAsync(
                             chatId: update.Message.Chat.Id,
                             text: "Супер!",
                             replyMarkup: Keyboard.order);
+
                         }
                         else if (message == "No")
                         {

@@ -13,10 +13,19 @@
         public bool ifHaveCommand;
         public override string ToString()
         {
-            return $"Iм'я: {name}\n" +
-                $"Номер телефону: {phoneNumber}\n" +
-                $"Адреса доставки: {deliveryAdress}\n" +
-                $"Коментар: {comment}";
+            if (ifHaveCommand)
+            {
+                return $"Iм'я: {name}\n" +
+                    $"Номер телефону: {phoneNumber}\n" +
+                    $"Адреса доставки: {deliveryAdress}\n" +
+                    $"Коментар: {comment}";
+            }
+            else
+            {
+                return $"Iм'я: {name}\n" +
+                    $"Номер телефону: {phoneNumber}\n" +
+                    $"Адреса доставки: {deliveryAdress}";
+            }
         }
         public string GetShortUserString()
         {
@@ -26,12 +35,12 @@
         }
         public void Clear()
         {
-            name = "";
-            deliveryAdress = "";
-            phoneNumber = "";
-            comment = "";
-            order = "";
-            data_time = "";
+            name = " ";
+            deliveryAdress = " ";
+            phoneNumber = " ";
+            comment = " ";
+            order = " ";
+            data_time = " ";
             readyToOrder = false;
             ifHaveCommand = false;
         }
