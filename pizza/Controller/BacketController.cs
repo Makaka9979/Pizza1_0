@@ -1,39 +1,18 @@
-﻿using System.Collections;
+﻿using Libs;
+using System.Collections;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
-using Telegram.Bot.Types.ReplyMarkups;
 
 namespace Controller 
 {
-    class BacketController : Libs.IController
+    public class BacketController : Libs.IController
     {
         private const ushort deliveryPrise = 59; //Незмінна ціна доставки піци.
+        private const long admin_id = 562489554;
 
-        private long allPriseOrder = 0;
         private Model.User user;
         private ArrayList _menu = AddMenu();
-        private ReplyKeyboardMarkup ifAllGood = new(new[] {
-            new KeyboardButton[] { "Yes", "No" }
-        }) { ResizeKeyboard = true }; //........
-        private ReplyKeyboardMarkup paymend = new(new[] {
-            new KeyboardButton[] { "Картою", "Готiвкою" }
-        }) { ResizeKeyboard = true }; //........
-        private ReplyKeyboardMarkup other = new(new[] {
-            new KeyboardButton[] { "Головне меню" }
-        }) { ResizeKeyboard = false }; //........
-        private ReplyKeyboardMarkup index = new(new[] {
-            new KeyboardButton[] { "Головне меню" }
-        }) { ResizeKeyboard = true };
-        private ReplyKeyboardMarkup basket = new(new[] {
-            new KeyboardButton[] { "Замовити", "Очистити" },
-            new KeyboardButton[] { "Головне меню" }
-        }) { ResizeKeyboard = true };
-        private ReplyKeyboardMarkup menu = new(new[] {
-            new KeyboardButton[] { "⏪ Назад", "⏩ Вперед" },
-            new KeyboardButton[] { "➕ Додати до кошика" },
-            new KeyboardButton[] { "Корзина", "Головне меню" }
-        }) { ResizeKeyboard = true };
 
         private static ArrayList AddMenu()
         {
@@ -87,82 +66,137 @@ namespace Controller
                         $"<a>{((Model.Menu)_menu[_page]).Text}</a>\n\n" +
                         $"<i>Цiна:</i> <a>{((Model.Menu)_menu[_page]).Price}</a>\n\n" +
                         $"<a>Сторiнка меню </a>[<b><i>{currentState}</i></b>]";
-
             await _client.SendPhotoAsync(
                         chatId: message.Chat.Id,
                         photo: ((Model.Menu)_menu[_page]).Link,
                         caption: text,
                         parseMode: ParseMode.Html,
-                        replyMarkup: menu);
+                        replyMarkup: Keyboard.menu);
         }
         public async void HandleAdd(ITelegramBotClient _client, Update update)
         {
-            int _page = (int)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"];
-            
-            ((ArrayList)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["orders"]).Add((Model.Menu)_menu[_page]);
+            ((ArrayList)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["orders"]).Add((Model.Menu)_menu[(int)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"]]);
              await _client.SendTextMessageAsync(
                 chatId: update.Message.Chat.Id,
-                text: $"Так, я добавив пiцу '{((Model.Menu)_menu[_page]).Name}' до кошику");
-            allPriseOrder += ((Model.Menu)_menu[_page]).Price;
-            Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"] = (object)_page;
-            await Menu(_client, update.Message, _page);
+                text: $"Так, я добавив пiцу '{((Model.Menu)_menu[(int)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"]]).Name}' до кошику");
+            int allPriseOrder = (int)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["allPriseOrder"];
+            allPriseOrder += ((Model.Menu)_menu[(int)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"]]).Price;
+            Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["allPriseOrder"] = (object)allPriseOrder;
+            await Menu(_client, update.Message, (int)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"]);
         }
         public async void HandleMenuNext(ITelegramBotClient _client, Update update)
         {
-            int _page = (int)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"];
-            _page++;
-            Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"] = (object)_page;
-            await Menu(_client, update.Message, _page);
+            Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"] = (object)((int)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"] + 1);
+            await Menu(_client, update.Message, (int)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"]);
         }
         public async void HandleMenuPrev(ITelegramBotClient _client, Update update)
         {
-            int _page = (int)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"];
-            _page--;
-            Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"] = (object)_page;
-            await Menu(_client, update.Message, _page);
+            Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"] = (object)((int)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"] - 1);
+            await Menu(_client, update.Message, (int)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"]);
         }
         public async void HandleMenu(ITelegramBotClient _client, Update update)
         {
             Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"] = (object)0;
             await Menu(_client, update.Message, 0);
         }
-        public async void HandleDeliveryData(ITelegramBotClient _client, Update update)
+        public async void HandleOrder(ITelegramBotClient _client, Update update)
         {
-            user = (Model.User)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"];
-            
+            if (((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).readyToOrder)
+            {
+                if (!((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).ifHaveCommand)
+                {
+                    await _client.SendTextMessageAsync(
+                        chatId: update.Message.Chat.Id,
+                        text: ($"{((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).order}\n----------\n{((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).ToString()}"));
+                    await _client.SendTextMessageAsync(
+                        chatId: update.Message.Chat.Id,
+                        text: "Хочеш додати коментарiй?",
+                        replyMarkup: Keyboard.ifComment0);
+                }
+                else
+                {
+                    await _client.SendTextMessageAsync(
+                        chatId: update.Message.Chat.Id,
+                        text: ($"{((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).order}\n\n{((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).ToString()}"),
+                        replyMarkup: Keyboard.ifComment1);
+                }
+            }
+            else
+            {
+                await _client.SendTextMessageAsync(
+                    chatId: update.Message.Chat.Id,
+                    text: "Спочатку заповни iнформацiю про доставку",
+                    replyMarkup: Keyboard.errorAddDeliveryInfo);
+            }
+        }
+        public async void HandleComment(ITelegramBotClient _client, Update update)
+        {
+            await _client.SendTextMessageAsync(
+                chatId: update.Message.Chat.Id,
+                text: "Що ти хочеш повiдомити менi?",
+                replyMarkup: Keyboard.order);
+            SessionRegistry.Sessions[update.Message.Chat.Id].State["userPage"] = (object)(9);
+        }
+        public async void HandleHotovo(ITelegramBotClient _client, Update update)
+        {
+            await _client.SendTextMessageAsync(
+                chatId: update.Message.Chat.Id,
+                text: $"Твоє замовлення:\n{((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).ThisOrder()}",
+                replyMarkup: Keyboard.hotovo);
+            await _client.SendTextMessageAsync(
+                chatId: admin_id,
+                text: $"Нове замовлення:\n{((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).ThisOrder()}",
+                replyMarkup: Keyboard.other);
+            ((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).Clear();
+            SessionRegistry.Sessions.Remove(update.Message.Chat.Id);
         }
         public async void HandleClear(ITelegramBotClient _client, Update update)
         {
             ((ArrayList)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["orders"]).Clear();
-            allPriseOrder = 0;
+            Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["allPriseOrder"] = (object)0;
             await _client.SendTextMessageAsync(
                 chatId: update.Message.Chat.Id,
                 text: "Тепер твiй кошик пустий.",
-                replyMarkup: index);
+                replyMarkup: Keyboard.other);
         }
         public async void HandleShowBacketContent(ITelegramBotClient _client, Update update)
         {
             if (((ArrayList)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["orders"]).Count < 1)
             {
                 await _client.SendTextMessageAsync(
-                chatId: update.Message.Chat.Id,
-                text: "Твiй кошик пустий.",
-                replyMarkup: index);
+                    chatId: update.Message.Chat.Id,
+                    text: "Твiй кошик пустий.");
+                await _client.SendTextMessageAsync(
+                    chatId: update.Message.Chat.Id,
+                    text: "Меню:",
+                    replyMarkup: Keyboard.other);
                 await Menu(_client, update.Message, (int)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["currentPage"]);
                 return;
             }
-            string listOrders = "Твоє замовлення:\n";
+            string listOrders = "";
             for (int i = 0; i < ((ArrayList)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["orders"]).Count; i++)
             {
-                listOrders += $" • {((ArrayList)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["orders"])[i].ToString()}\n";
+                listOrders += $"{((ArrayList)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["orders"])[i].ToString()}\n";
             }
-            allPriseOrder += deliveryPrise;
-            listOrders += $"Доставка - {deliveryPrise} гривень\nВсього: {allPriseOrder} гривень, 0 копійок";
-            // user.order = listOrders;
-            await _client.SendTextMessageAsync(
-                        chatId: update.Message.Chat.Id,
-                        text: listOrders,
-                        replyMarkup: basket);
+            listOrders += $"\n Доставка, {deliveryPrise} грн\nВсього: {((int)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["allPriseOrder"]) + (int)deliveryPrise} гривень, 0 копійок";
+            user = ((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]);
+            user.order = listOrders;
+            SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"] = (object)user;
+
+            if (((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).readyToOrder)
+            {
+                await _client.SendTextMessageAsync(
+                    chatId: update.Message.Chat.Id,
+                    text: $"Твоє замовлення:\n{listOrders}",
+                    replyMarkup: Keyboard.basket2);
+            } 
+            else
+            {
+                await _client.SendTextMessageAsync(
+                    chatId: update.Message.Chat.Id,
+                    text: $"Твоє замовлення:\n{listOrders}",
+                    replyMarkup: Keyboard.basket1);
+            }
         }
 
         public async void Run(ITelegramBotClient _client, Update update)
@@ -180,6 +214,12 @@ namespace Controller
                 HandleClear(_client, update);
             else if (message == "Корзина")
                 HandleShowBacketContent(_client, update);
+            else if (message == "✅Замовити" || message == "🚫Замовити")
+                HandleOrder(_client, update);
+            else if (message == "Додати комментарiй")
+                HandleComment(_client, update);
+            else if (message == "🍪Готово")
+                HandleHotovo(_client, update);
         }
     }
 }
