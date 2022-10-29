@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Model {
+﻿namespace Model {
     internal class Menu {
         public string Link { get; set; }
         public string Name { get; set; }

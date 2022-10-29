@@ -24,7 +24,7 @@ static class Keyboard
     //namespace Controller 
     public static ReplyKeyboardMarkup basket1 = new(new[] {
             new KeyboardButton[] { "🚫Замовити", "Очистити" },
-            new KeyboardButton[] { "🚫Додати iнформацiю про доставку" },
+            new KeyboardButton[] { "⁉️Додати iнформацiю про доставку" },
             new KeyboardButton[] { "Головне меню" }
     }) { ResizeKeyboard = true };
     public static ReplyKeyboardMarkup basket2 = new(new[] {
@@ -33,7 +33,7 @@ static class Keyboard
             new KeyboardButton[] { "Головне меню" }
     }) { ResizeKeyboard = true };
     public static ReplyKeyboardMarkup errorAddDeliveryInfo = new(new[] {
-            new KeyboardButton[] { "🚫Додати iнформацiю про доставку" ,"Головне меню" }
+            new KeyboardButton[] { "⁉️Додати iнформацiю про доставку", "Головне меню" }
     }) { ResizeKeyboard = true };
     public static ReplyKeyboardMarkup hotovo = new(new[] {
             new KeyboardButton[] { "🍪Готово", "Головне меню" }
@@ -98,7 +98,7 @@ namespace Bot
         user -> Comment
         all good?
          */
-        public async void HandleDeliveryData(ITelegramBotClient _client, Update update)
+        public async Task HandleDeliveryData(ITelegramBotClient _client, Update update)
         {
             string message = update.Message.Text;
             user = (Model.User)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"];
@@ -188,12 +188,12 @@ namespace Bot
                     break;
             }
         }
-        private async void UserInformationDelivery(Update update)
+        private async Task UserInformationDelivery(Update update)
         {
             var message = update.Message;
             if (!Keyboard.greenCardCommandsList.Contains(message.Text))
             {
-                if (message.Text == "🚫Додати iнформацiю про доставку")
+                if (message.Text == "⁉️Додати iнформацiю про доставку")
                 {
                     Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["userPage"] = (object)(0);
                 }
@@ -210,7 +210,7 @@ namespace Bot
                     ((Model.User)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).Clear();
                     Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["userPage"] = (object)(0);
                 }
-                HandleDeliveryData(_client, update);
+                await HandleDeliveryData(_client, update);
                 return;
             }
             else
@@ -240,11 +240,11 @@ namespace Bot
                 session.State.Add("userInformation", (object)user);
 
                 Libs.SessionRegistry.Sessions.Add(message.Chat.Id, session);
-            }
+            } 
             Thread.Sleep(100);
             Libs.LoggerRegistry.GetLogger("file").Info($"[{DateTime.Now}] #{message.Chat.Id}_[{message.MessageId}] '{message.Text}'");
 
-            UserInformationDelivery(update);
+            await UserInformationDelivery(update);
             Libs.ControllerRegistry.Get(message.Text)?.Run(_client, update);
         }
 

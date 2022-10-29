@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Libs
+﻿namespace Libs
 {
     public interface ILogger : IDisposable
     {

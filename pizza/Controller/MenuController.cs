@@ -18,7 +18,7 @@ namespace Controller
         private string gpsTitle = "ВСП «ХКТФК НТУ «ХПI»";
         private string gpsAddress = "вулиця Манiзера, 4, Харкiв, Харкiвська область, Украина, 61000";
 
-        public async void HandleContact(ITelegramBotClient _client, Update update)
+        public async Task HandleContact(ITelegramBotClient _client, Update update)
         {
             await _client.SendContactAsync(
                 chatId: update.Message.Chat.Id,
@@ -34,7 +34,7 @@ namespace Controller
                 title: gpsTitle,
                 address: gpsAddress);
         }
-        public async void HandleStart(ITelegramBotClient _client, Update update)
+        public async Task HandleStart(ITelegramBotClient _client, Update update)
         {
             await _client.SendTextMessageAsync(
                 chatId: update.Message.Chat.Id,
@@ -46,7 +46,7 @@ namespace Controller
                 replyMarkup: Keyboard.index);
             LoggerRegistry.GetLogger("file").Info($"{Keyboard.NewUserMsg(update.Message)}");
         }
-        public async void HandleIndex(ITelegramBotClient _client, Update update)
+        public async Task HandleIndex(ITelegramBotClient _client, Update update)
         {
             await _client.SendTextMessageAsync(
                 chatId: update.Message.Chat.Id,
@@ -57,11 +57,11 @@ namespace Controller
         {
             string message = update.Message.Text;
             if (message == "/start")
-                HandleStart(_client, update);
+                await HandleStart(_client, update);
             else if (message == "Головне меню")
-                HandleIndex(_client, update);
+                await HandleIndex(_client, update);
             else if (message == "Контакти")
-                HandleContact(_client, update);
+                await HandleContact(_client, update);
         }
     }
 }

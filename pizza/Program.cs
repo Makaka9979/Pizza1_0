@@ -36,73 +36,12 @@ class Program
 
             bot.Run();
             Console.ReadLine();
-
-            now = $" STOP [{DateTime.Now}]\n";
-            LoggerRegistry.GetLogger("file").Info(now);
         }
         finally
         {
+            LoggerRegistry.GetLogger("file").Info($"\n STOP [{DateTime.Now}]\n");
             LoggerRegistry.Clear();
         }
     }
 }
-/*else if (message.Text == "Замовити")
-                {
-                    if (addOrder.Count < 1)
-                    {
-                        sentMessage = await _client.SendTextMessageAsync(
-                        chatId: message.Chat.Id,
-                        text: "Твiй кошик пустий.",
-                        replyMarkup: basket);
-                    }
-                    else
-                    {
-                        user.userId = message.Chat.Id;
-                        countBasket = 1;
-                        sentMessage = await _client.SendTextMessageAsync(
-                            chatId: message.Chat.Id,
-                            text: "Як до тебе звертатися?",
-                            replyMarkup: other);
-                    }
-                }*/
-
 //logger.GetLogger("file").Info($"[{DateTime.Now}] #{message.Chat.Id}_[{message.MessageId}] '{message.Text}'");
-
-/*
- *  if (message.Text == "/start")
-                {
-                    ControllerRegistry.Get("/start")?.Run(_client, update);
-                }
-                else if (message.Text == "Контакти")
-                {
-                    ControllerRegistry.Get("Контакти")?.Run(_client, update);
-                }
-                else if (message.Text == "Меню")
-                {
-                    ControllerRegistry.Get("Меню")?.Run(_client, update);
-                }
-                else if (message.Text == "⏪ Назад")
-                {
-                    ControllerRegistry.Get("⏪ Назад")?.Run(_client, update);
-                }
-                else if (message.Text == "⏩ Вперед")
-                {
-                    ControllerRegistry.Get("⏩ Вперед")?.Run(_client, update);
-                }
-                else if (message.Text == "➕ Додати до кошика")
-                {
-                    ControllerRegistry.Get("➕ Додати до кошика")?.Run(_client, update);
-                }
-                else if (message.Text == "Корзина")
-                {
-                    ControllerRegistry.Get("Корзина")?.Run(_client, update);
-                }
-                else if (message.Text == "Головне меню")
-                {
-                    ControllerRegistry.Get("Головне меню")?.Run(_client, update);
-                }
-                else if (message.Text == "Очистити")
-                {
-                    ControllerRegistry.Get("Очистити")?.Run(_client, update);
-                }
-*/

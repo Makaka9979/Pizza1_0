@@ -137,12 +137,12 @@ namespace Controller
                 replyMarkup: Keyboard.order);
             SessionRegistry.Sessions[update.Message.Chat.Id].State["userPage"] = (object)(9);
         }
-        public async void HandleHotovo(ITelegramBotClient _client, Update update)
+        public async Task HandleHotovo(ITelegramBotClient _client, Update update)
         {
             await _client.SendTextMessageAsync(
                 chatId: update.Message.Chat.Id,
                 text: $"Твоє замовлення:\n{((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).ThisOrder()}",
-                replyMarkup: Keyboard.hotovo);
+                replyMarkup: Keyboard.other);
             await _client.SendTextMessageAsync(
                 chatId: admin_id,
                 text: $"Нове замовлення:\n{((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).ThisOrder()}",
@@ -219,7 +219,19 @@ namespace Controller
             else if (message == "Додати комментарiй")
                 HandleComment(_client, update);
             else if (message == "🍪Готово")
-                HandleHotovo(_client, update);
+            {
+                if (((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).readyToOrder)
+                {
+                    await HandleHotovo(_client, update);
+                }
+                else
+                {
+                    await _client.SendTextMessageAsync(
+                    chatId: update.Message.Chat.Id,
+                    text: "Твiй кошик досi пустий.",
+                    replyMarkup: Keyboard.index);
+                }
+            }
         }
     }
 }
