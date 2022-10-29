@@ -1,8 +1,5 @@
 ﻿using Telegram.Bot.Types;
 using Telegram.Bot;
-using Telegram.Bot.Types.ReplyMarkups;
-using Libs;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Controller
 {
@@ -44,7 +41,7 @@ namespace Controller
                 chatId: update.Message.Chat.Id,
                 text: "Вибирай що хочеш зробити",
                 replyMarkup: Keyboard.index);
-            LoggerRegistry.GetLogger("file").Info($"{Keyboard.NewUserMsg(update.Message)}");
+            Libs.LoggerRegistry.GetLogger("file").Info($"{Keyboard.NewUserMsg(update.Message)}");
         }
         public async Task HandleIndex(ITelegramBotClient _client, Update update)
         {

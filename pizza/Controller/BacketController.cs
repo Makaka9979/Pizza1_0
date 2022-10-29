@@ -1,5 +1,4 @@
-﻿using Libs;
-using System.Collections;
+﻿using System.Collections;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
@@ -101,13 +100,13 @@ namespace Controller
         }
         public async void HandleOrder(ITelegramBotClient _client, Update update)
         {
-            if (((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).readyToOrder)
+            if (((Model.User)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).readyToOrder)
             {
-                if (!((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).ifHaveCommand)
+                if (!((Model.User)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).ifHaveCommand)
                 {
                     await _client.SendTextMessageAsync(
                         chatId: update.Message.Chat.Id,
-                        text: ($"{((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).order}\n----------\n{((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).ToString()}"));
+                        text: ($"{((Model.User)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).order}\n----------\n{((Model.User)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).ToString()}"));
                     await _client.SendTextMessageAsync(
                         chatId: update.Message.Chat.Id,
                         text: "Хочеш додати коментарiй?",
@@ -117,7 +116,7 @@ namespace Controller
                 {
                     await _client.SendTextMessageAsync(
                         chatId: update.Message.Chat.Id,
-                        text: ($"{((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).order}\n----------\n{((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).ToString()}"),
+                        text: ($"{((Model.User)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).order}\n----------\n{((Model.User)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).ToString()}"),
                         replyMarkup: Keyboard.ifComment1);
                 }
             }
@@ -135,20 +134,20 @@ namespace Controller
                 chatId: update.Message.Chat.Id,
                 text: "Що ти хочеш повiдомити менi?",
                 replyMarkup: Keyboard.order);
-            SessionRegistry.Sessions[update.Message.Chat.Id].State["userPage"] = (object)(9);
+            Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["userPage"] = (object)(9);
         }
         public async Task HandleHotovo(ITelegramBotClient _client, Update update)
         {
             await _client.SendTextMessageAsync(
                 chatId: update.Message.Chat.Id,
-                text: $"Твоє замовлення:\n{((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).ThisOrder()}",
+                text: $"Твоє замовлення:\n{((Model.User)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).ThisOrder()}",
                 replyMarkup: Keyboard.other);
             await _client.SendTextMessageAsync(
                 chatId: admin_id,
-                text: $"Нове замовлення:\n{((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).ThisOrder()}",
+                text: $"Нове замовлення:\n{((Model.User)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).ThisOrder()}",
                 replyMarkup: Keyboard.other);
-            ((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).Clear();
-            SessionRegistry.Sessions.Remove(update.Message.Chat.Id);
+            ((Model.User)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).Clear();
+            Libs.SessionRegistry.Sessions.Remove(update.Message.Chat.Id);
         }
         public async void HandleClear(ITelegramBotClient _client, Update update)
         {
@@ -179,11 +178,11 @@ namespace Controller
                 listOrders += $"{((ArrayList)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["orders"])[i].ToString()}\n";
             }
             listOrders += $"\n Доставка, {deliveryPrise} грн\nВсього: {((int)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["allPriseOrder"]) + (int)deliveryPrise} гривень, 0 копійок";
-            user = ((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]);
+            user = ((Model.User)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]);
             user.order = listOrders;
-            SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"] = (object)user;
+            Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"] = (object)user;
 
-            if (((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).readyToOrder)
+            if (((Model.User)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).readyToOrder)
             {
                 await _client.SendTextMessageAsync(
                     chatId: update.Message.Chat.Id,
@@ -220,7 +219,7 @@ namespace Controller
                 HandleComment(_client, update);
             else if (message == "🍪Готово")
             {
-                if (((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).readyToOrder)
+                if (((Model.User)Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).readyToOrder)
                 {
                     await HandleHotovo(_client, update);
                 }
