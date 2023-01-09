@@ -22,7 +22,7 @@ namespace Controller
                 phoneNumber: contactPhone,
                 firstName: contactFName,
                 vCard: vCardTg,
-                replyMarkup: Keyboard.other);
+                replyMarkup: Bot.Keyboard.other);
             Thread.Sleep(250);
             await _client.SendVenueAsync(
                 chatId: update.Message.Chat.Id,
@@ -31,24 +31,44 @@ namespace Controller
                 title: gpsTitle,
                 address: gpsAddress);
         }
+        
+        public string GetHelloUserString(Update update)
+        {
+            string hello = "Привiт";
+            if (update.Message.Chat.FirstName != null)
+            {
+                hello += $", {update.Message.Chat.FirstName}";
+
+                if (update.Message.Chat.LastName != null)
+                {
+                    hello += $" {update.Message.Chat.LastName}";
+                }
+            }
+            else if (update.Message.Chat.LastName != null)
+            {
+                hello += $", {update.Message.Chat.LastName}";
+            }
+            return $"{hello}!";
+        }
         public async Task HandleStart(ITelegramBotClient _client, Update update)
         {
             await _client.SendTextMessageAsync(
                 chatId: update.Message.Chat.Id,
-                text: "А я тебе вже зачекався 🌚");
+                text: $"{GetHelloUserString(update)}\n" +
+                    $"А я тебе вже зачекався 🌚");
             Thread.Sleep(250);
             await _client.SendTextMessageAsync(
                 chatId: update.Message.Chat.Id,
                 text: "Вибирай що хочеш зробити",
-                replyMarkup: Keyboard.index);
-            Libs.LoggerRegistry.GetLogger("file").Info($"{Keyboard.NewUserMsg(update.Message)}");
+                replyMarkup: Bot.Keyboard.index);
+            Libs.LoggerRegistry.GetLogger("file").Info($"{Bot.Keyboard.NewUserMsg(update.Message)}");
         }
         public async Task HandleIndex(ITelegramBotClient _client, Update update)
         {
             await _client.SendTextMessageAsync(
                 chatId: update.Message.Chat.Id,
                 text: "Вибирай що хочеш зробити",
-                replyMarkup: Keyboard.index);
+                replyMarkup: Bot.Keyboard.index);
         }
         public async void Run(ITelegramBotClient _client, Update update)
         {

@@ -35,25 +35,24 @@
         }
         public void Clear()
         {
-            name = " ";
-            deliveryAdress = " ";
-            phoneNumber = " ";
-            comment = " ";
-            order = " ";
-            data_time = " ";
+            name = "";
+            deliveryAdress = "";
+            phoneNumber = "";
+            comment = "";
+            order = "";
+            data_time = "";
             readyToOrder = false;
             ifHaveCommand = false;
         }
-        public string Data_Time()
+        public void Data_Time()
         {
             data_time = DateTime.Now.ToString();
-            return data_time;
         }
         public string ThisOrder()
         {
             return ($"{order}" +
                 $"\n----------\n" +
-                $"{ToString()}\nНомер замовлення: {userId} {Data_Time()}");
+                $"{ToString()}\nНомер замовлення: {userId} {data_time}");
         }
     }
 }

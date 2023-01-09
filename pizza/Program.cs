@@ -1,6 +1,4 @@
-﻿using Libs;
-
-class Program
+﻿class Program
 {
     async static Task Main(string[] args) 
     {
@@ -9,38 +7,38 @@ class Program
             string fileAddress = "infoLog.log";
 
             var menuController = new Controller.MenuController();
-            ControllerRegistry.Add("/start", menuController);
-            ControllerRegistry.Add("Головне меню", menuController);
-            ControllerRegistry.Add("Контакти", menuController);
+            Libs.ControllerRegistry.Add("/start", menuController);
+            Libs.ControllerRegistry.Add("Головне меню", menuController);
+            Libs.ControllerRegistry.Add("Контакти", menuController);
 
             var backetController = new Controller.BacketController();
-            ControllerRegistry.Add("Меню", backetController);
-            ControllerRegistry.Add("⏪ Назад", backetController);
-            ControllerRegistry.Add("⏩ Вперед", backetController);
-            ControllerRegistry.Add("➕ Додати до кошика", backetController);
-            ControllerRegistry.Add("Корзина", backetController);
-            ControllerRegistry.Add("Очистити", backetController);
-            ControllerRegistry.Add("✅Замовити", backetController);
-            ControllerRegistry.Add("🚫Замовити", backetController);
-            ControllerRegistry.Add("Додати комментарiй", backetController);
-            ControllerRegistry.Add("🍪Готово", backetController);
+            Libs.ControllerRegistry.Add("Меню", backetController);
+            Libs.ControllerRegistry.Add("⏪ Назад", backetController);
+            Libs.ControllerRegistry.Add("⏩ Вперед", backetController);
+            Libs.ControllerRegistry.Add("➕ Додати до кошика", backetController);
+            Libs.ControllerRegistry.Add("Корзина", backetController);
+            Libs.ControllerRegistry.Add("Очистити", backetController);
+            Libs.ControllerRegistry.Add("✅Замовити", backetController);
+            Libs.ControllerRegistry.Add("🚫Замовити", backetController);
+            Libs.ControllerRegistry.Add("Додати комментарiй", backetController);
+            Libs.ControllerRegistry.Add("🍪Готово", backetController);
 
-            LoggerRegistry.AddLogger("cli", new CLILogger());
-            LoggerRegistry.AddLogger("file", new FileLogger(fileAddress));
+            Libs.LoggerRegistry.AddLogger("cli", new Libs.CLILogger());
+            Libs.LoggerRegistry.AddLogger("file", new Libs.FileLogger(fileAddress));
 
             Bot.Telegram bot = new Bot.Telegram();
 
             string now = $" START [{DateTime.Now}]\n";
-            LoggerRegistry.GetLogger("cli").Info(now);
-            LoggerRegistry.GetLogger("file").Info(now);
+            Libs.LoggerRegistry.GetLogger("cli").Info(now);
+            Libs.LoggerRegistry.GetLogger("file").Info(now);
 
             bot.Run();
             Console.ReadLine();
         }
         finally
         {
-            LoggerRegistry.GetLogger("file").Info($"\n STOP [{DateTime.Now}]\n");
-            LoggerRegistry.Clear();
+            Libs.LoggerRegistry.GetLogger("file").Info($"\n STOP [{DateTime.Now}]\n");
+            Libs.LoggerRegistry.Clear();
         }
     }
 }

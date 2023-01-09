@@ -1,79 +1,7 @@
 ﻿using Telegram.Bot;
 using Telegram.Bot.Types;
 using System.Collections;
-using Telegram.Bot.Types.ReplyMarkups;
 using Libs;
-
-static class Keyboard
-{
-    //namespace Bot
-    public static ReplyKeyboardMarkup other = new(new[] {
-            new KeyboardButton[] { "Головне меню" }
-    }) { ResizeKeyboard = true }; 
-    public static ReplyKeyboardMarkup dataUserClear = new(new[] {
-            new KeyboardButton[] { "Змiнити iнформацiю", "Головне меню" }
-     }) { ResizeKeyboard = true }; 
-    public static ReplyKeyboardMarkup ifAllGood = new(new[] {
-            new KeyboardButton[] { "Yes", "No" },
-            new KeyboardButton[] { "Головне меню" }
-    }) { ResizeKeyboard = true }; 
-    public static ReplyKeyboardMarkup order = new(new[] {
-            new KeyboardButton[] { "✅Замовити", "Головне меню" }
-    }) { ResizeKeyboard = true };
-
-    //namespace Controller 
-    public static ReplyKeyboardMarkup basket1 = new(new[] {
-            new KeyboardButton[] { "🚫Замовити", "Очистити" },
-            new KeyboardButton[] { "⁉️Додати iнформацiю про доставку" },
-            new KeyboardButton[] { "Головне меню" }
-    }) { ResizeKeyboard = true };
-    public static ReplyKeyboardMarkup basket2 = new(new[] {
-            new KeyboardButton[] { "✅Замовити", "Очистити" },
-            new KeyboardButton[] { "✅Додати iнформацiю про доставку" },
-            new KeyboardButton[] { "Головне меню" }
-    }) { ResizeKeyboard = true };
-    public static ReplyKeyboardMarkup errorAddDeliveryInfo = new(new[] {
-            new KeyboardButton[] { "⁉️Додати iнформацiю про доставку", "Головне меню" }
-    }) { ResizeKeyboard = true };
-    public static ReplyKeyboardMarkup hotovo = new(new[] {
-            new KeyboardButton[] { "🍪Готово", "Головне меню" }
-    }) { ResizeKeyboard = true };
-    public static ReplyKeyboardMarkup ifComment0 = new(new[] {
-            new KeyboardButton[] { "Додати комментарiй", "🍪Готово" },
-            new KeyboardButton[] { "Головне меню" }
-    }) { ResizeKeyboard = true };
-    public static ReplyKeyboardMarkup ifComment1 = new(new[] {
-            new KeyboardButton[] { "🍪Готово" , "Головне меню" }
-    }) { ResizeKeyboard = true };
-    public static ReplyKeyboardMarkup menu = new(new[] {
-            new KeyboardButton[] { "⏪ Назад", "⏩ Вперед" },
-            new KeyboardButton[] { "➕ Додати до кошика" },
-            new KeyboardButton[] { "Корзина", "Головне меню" }
-    }) { ResizeKeyboard = true };
-
-    public static ReplyKeyboardMarkup index = new(new[] {
-            new KeyboardButton[] { "Меню", "Корзина" },
-            new KeyboardButton[] { "Контакти" }
-    }) { ResizeKeyboard = true };
-
-    public static string[] greenCardCommandsList = { "Меню", "Корзина", "Контакти", "Головне меню", "⏪ Назад", "⏩ Вперед",
-            "➕ Додати до кошика", "Очистити", "✅Замовити", "🚫Замовити", "Додати комментарiй", "🍪Готово" };
-
-    public static string NewUserMsg(Message message)
-    {
-        string userData = "...\nNEW_USER:: ";
-        if (message.Chat.LastName != null) { userData += $"LastName:'{message.Chat.LastName}'/, "; }
-        if (message.Chat.FirstName != null) { userData += $"FirstName:'{message.Chat.FirstName}'/ "; }
-        if (message.Chat.Username != null) { userData += $"Username:'{message.Chat.Username}'/ "; }
-        if (message.Chat.LinkedChatId != null) { userData += $"LinkedChatId:'{message.Chat.LinkedChatId}'/ "; }
-        if (message.Chat.Bio != null) { userData += $"Bio:'{message.Chat.Bio}'/ "; }
-        if (message.Chat.Title != null) { userData += $"Title:'{message.Chat.Title}'/ "; }
-        if (message.Chat.InviteLink != null) { userData += $"InviteLink:'{message.Chat.InviteLink}'/ "; }
-        if (message.Chat.StickerSetName != null) { userData += $"StickerSetName:'{message.Chat.StickerSetName}'/ "; }
-        if (message.Chat.Description != null) { userData += $"Description:'{message.Chat.Description}'/ "; }
-        return (userData + $"Id:'{message.Chat.Id}'\n");
-    }
-}
 
 namespace Bot
 {
@@ -84,20 +12,13 @@ namespace Bot
 
         public Telegram()
         {
-            string _token = "5529174269:AAFdFoselL-cnp7wt4EveCQ-cyMXxKNHJro";
-            _client = new TelegramBotClient(_token); ;
+            string _token = "5529174269:AAEohLr_pkez9C5pYt_SHeO_nLNFZFVTLG4";
+            _client = new TelegramBotClient(_token);
         }
         public void Run() 
         {
             _client.StartReceiving(Update, ErrorMessage);
         }
-        /*
-        user -> Name
-        user -> Phone
-        user -> Delivery Adress
-        user -> Comment
-        all good?
-         */
         public async Task HandleDeliveryData(ITelegramBotClient _client, Update update)
         {
             string message = update.Message.Text;
@@ -180,7 +101,10 @@ namespace Bot
                         Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"] = (object)user;
                         await _client.SendTextMessageAsync(
                             chatId: update.Message.Chat.Id,
-                            text: ($"{((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).order}\n----------\n{((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).ToString()}"));
+                            text: ($"{((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).order}" +
+                            $"\n----------\n" +
+                            $"{((Model.User)SessionRegistry.Sessions[update.Message.Chat.Id].State["userInformation"]).ToString()}"),
+                            replyMarkup: Bot.Keyboard.ifComment1);
                         Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["userPage"] = (object)(-1);
                         break;
                     }
@@ -218,9 +142,11 @@ namespace Bot
                 Libs.SessionRegistry.Sessions[update.Message.Chat.Id].State["userPage"] = (object)(-1);
             }
         }
-
         private async Task Update(ITelegramBotClient botClient, Update update, CancellationToken botToken)
         {
+            //..............................
+            Console.WriteLine($"_info: /{DateTime.UtcNow}/ /{update.Message.Chat.Id}/ /{update.Message.Text}/");
+            //..............................
             var message = update.Message;
             if (message == null)
                 return;
@@ -231,14 +157,12 @@ namespace Bot
                 Libs.Session session = new();
                 ArrayList orders = new ArrayList();
                 session.State.Add("orders", (object)orders);
-                session.State.Add("id", (object)message.Chat.Id);
                 session.State.Add("currentPage", (object)0);
                 session.State.Add("userPage", (object)(-1));
                 session.State.Add("allPriseOrder", (object)(0));
                 user.readyToOrder = false;
                 user.userId = message.Chat.Id;
                 session.State.Add("userInformation", (object)user);
-
                 Libs.SessionRegistry.Sessions.Add(message.Chat.Id, session);
             } 
             Thread.Sleep(100);
